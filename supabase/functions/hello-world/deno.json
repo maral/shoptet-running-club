@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "drizzle-orm/": "npm:/drizzle-orm/",
+    "pg": "npm:pg"
+  },
+  "fmt": {
+    "options": {
+      "indentWidth": 2
+    }
+  }
+}
