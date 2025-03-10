@@ -1,7 +1,7 @@
 import { date, integer, pgTable, text } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/node-postgres";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { sql } from "drizzle-orm/";
+import { and, between, notInArray, sql } from "drizzle-orm/";
 import _pg from "pg";
 import { StravaActivity } from "./stravaApi.ts";
 
@@ -44,6 +44,8 @@ export async function getLeaderboard() {
     0,
   );
 
+  const excludedAthletes = Deno.env.get("EXCLUDED_ATHLETES")?.split(",") ?? [];
+
   return await getDb().select({
     athlete: activities.athlete,
     total_distance: sql<number>`SUM(${activities.distance})`,
@@ -52,7 +54,14 @@ export async function getLeaderboard() {
   })
     .from(activities)
     .where(
-      sql`${activities.saved_at} >= ${startOfMonth} AND ${activities.saved_at} <= ${endOfMonth}`,
+      and(
+        between(
+          activities.saved_at,
+          startOfMonth.toISOString(),
+          endOfMonth.toISOString(),
+        ),
+        notInArray(activities.athlete, excludedAthletes),
+      ),
     )
     .groupBy(activities.athlete)
     .orderBy(sql`SUM(${activities.distance}) DESC`);
