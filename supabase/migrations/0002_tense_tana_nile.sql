@@ -1,0 +1,1 @@
+ALTER TABLE "activities" ALTER COLUMN "saved_at" SET DATA TYPE timestamp;

@@ -1,4 +1,4 @@
-import { date, integer, pgTable, text } from "drizzle-orm/pg-core";
+import { date, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const tokens = pgTable("tokens", {
   name: text().primaryKey(),
@@ -14,5 +14,5 @@ export const activities = pgTable("activities", {
   elapsed_time: integer().notNull(),
   total_elevation_gain: integer().notNull(),
   sport_type: text().notNull(),
-  saved_at: date().notNull().defaultNow(),
+  saved_at: timestamp().notNull().defaultNow(),
 });
