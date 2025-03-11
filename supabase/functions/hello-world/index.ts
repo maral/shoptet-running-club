@@ -37,8 +37,7 @@ Deno.serve(async () => {
       .setAlign(3, AsciiAlign.RIGHT)
       .setAlign(4, AsciiAlign.RIGHT);
 
-    console.log(table.toString());
-    // await postToSlack("```" + table.toString() + "```");
+    await postToSlack("```" + table.toString() + "```");
 
     return new Response(
       JSON.stringify({ success: true }),
