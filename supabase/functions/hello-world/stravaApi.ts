@@ -84,6 +84,7 @@ export async function getStravaClubActivities(accessToken: string) {
       },
       searchParams: {
         after,
+        per_page: 200,
       },
     },
   ).json();
