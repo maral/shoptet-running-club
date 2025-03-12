@@ -1,4 +1,4 @@
-import { date, integer, pgTable, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/node-postgres";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { and, between, notInArray, sql } from "drizzle-orm/";
@@ -19,7 +19,7 @@ export const activities = pgTable("activities", {
   elapsed_time: integer().notNull(),
   total_elevation_gain: integer().notNull(),
   sport_type: text().notNull(),
-  saved_at: date().notNull().defaultNow(),
+  saved_at: timestamp().notNull().defaultNow(),
 });
 
 let db: ReturnType<typeof drizzle>;
@@ -57,8 +57,8 @@ export async function getLeaderboard() {
       and(
         between(
           activities.saved_at,
-          startOfMonth.toISOString(),
-          endOfMonth.toISOString(),
+          startOfMonth,
+          endOfMonth,
         ),
         notInArray(activities.athlete, excludedAthletes),
       ),
