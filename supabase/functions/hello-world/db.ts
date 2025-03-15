@@ -33,12 +33,33 @@ export function getDb() {
 }
 
 export async function getLeaderboard() {
+  const yesterdayLeaderboardData = await getLeaderboardData(
+    // 24 hours ago
+    new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
+  );
+  const yesterdayPositions = new Map(
+    yesterdayLeaderboardData.map((row, index) => [row.athlete, index + 1]),
+  );
+  const leaderboardData = await getLeaderboardData();
+  const leaderboard = leaderboardData.map((row, index) => ({
+    position: index + 1,
+    position_change: (yesterdayPositions.get(row.athlete) ??
+      leaderboardData.length) - (index + 1),
+    athlete: row.athlete,
+    total_distance: row.total_distance,
+    total_moving_time: row.total_moving_time,
+    total_elevation_gain: row.total_elevation_gain,
+  }));
+  return leaderboard;
+}
+
+export async function getLeaderboardData(endDate?: Date) {
   const startOfMonth = new Date(
     new Date().getFullYear(),
     new Date().getMonth(),
     1,
   );
-  const endOfMonth = new Date(
+  endDate = endDate ?? new Date(
     new Date().getFullYear(),
     new Date().getMonth() + 1,
     0,
@@ -58,7 +79,7 @@ export async function getLeaderboard() {
         between(
           activities.saved_at,
           startOfMonth,
-          endOfMonth,
+          endDate,
         ),
         notInArray(activities.athlete, excludedAthletes),
       ),

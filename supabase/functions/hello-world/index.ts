@@ -24,18 +24,21 @@ Deno.serve(async () => {
       title: `Shoptet Running Challenge ${
         now.getMonth() + 1
       }/${now.getFullYear()}`,
-      heading: ["#", "Jméno", "Vzdálenost", "Převýšení", "Celkový čas"],
-      rows: leaderboard.map((row, index) => [
-        index + 1,
+      heading: ["#", "∆", "Jméno", "Vzdálenost", "Převýšení", "Celkový čas"],
+      rows: leaderboard.map((row) => [
+        row.position,
+        row.position_change !== 0
+          ? `${(row.position_change > 0 ? "+" : "")}${row.position_change}`
+          : "",
         row.athlete,
         `${(row.total_distance / 1000).toFixed(1)} km`,
         `${row.total_elevation_gain} m`,
         new Date(row.total_moving_time * 1000).toISOString().slice(11, 19),
       ]),
     })
-      .setAlign(2, AsciiAlign.RIGHT)
       .setAlign(3, AsciiAlign.RIGHT)
-      .setAlign(4, AsciiAlign.RIGHT);
+      .setAlign(4, AsciiAlign.RIGHT)
+      .setAlign(5, AsciiAlign.RIGHT);
 
     await postToSlack("```" + table.toString() + "```");
 
