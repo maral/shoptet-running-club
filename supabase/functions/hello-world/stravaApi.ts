@@ -89,5 +89,7 @@ export async function getStravaClubActivities(accessToken: string) {
     },
   ).json();
 
-  return res;
+  return res.filter((activity) =>
+    activity.sport_type === "Run" || activity.sport_type === "TrailRun"
+  );
 }
