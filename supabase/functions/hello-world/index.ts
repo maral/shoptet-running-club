@@ -4,8 +4,8 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { getLeaderboard, getNewActivities, saveNewActivities } from "./db.ts";
 import { getStravaAccessToken, getStravaClubActivities } from "./stravaApi.ts";
-import { getLeaderboard, saveNewActivities } from "./db.ts";
 
 import AsciiTable, {
   AsciiAlign,
@@ -16,7 +16,21 @@ Deno.serve(async () => {
   try {
     const stravaAccessToken = await getStravaAccessToken();
     const data = await getStravaClubActivities(stravaAccessToken);
-    await saveNewActivities(data);
+    const newActivities = await getNewActivities(data);
+    await saveNewActivities(newActivities);
+
+    for (const activity of newActivities) {
+      await postToSlack(
+        `:runner: Nový běh :runner:\n*${activity.athlete.firstname} ${activity.athlete.lastname} - ${activity.name}*\n:arrow_right: ${
+          (activity.distance / 1000).toFixed(1)
+        } km    :arrow_up: ${activity.total_elevation_gain} m    :stopwatch: ${
+          new Date(activity.moving_time * 1000).toISOString().slice(11, 19)
+        }    :skatepeped: ${
+          new Date(activity.moving_time / activity.distance * 1000 * 1000)
+            .toISOString().slice(15, 19)
+        } min/km`,
+      );
+    }
 
     const leaderboard = await getLeaderboard();
     const now = new Date();

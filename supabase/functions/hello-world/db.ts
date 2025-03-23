@@ -1,7 +1,7 @@
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/node-postgres";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { and, between, notInArray, sql } from "drizzle-orm/";
+import { and, between, inArray, notInArray, sql } from "drizzle-orm/";
 import _pg from "pg";
 import { StravaActivity } from "./stravaApi.ts";
 
@@ -53,6 +53,10 @@ export async function getLeaderboard() {
   return leaderboard;
 }
 
+export function getExcludedAthletes() {
+  return Deno.env.get("EXCLUDED_ATHLETES")?.split(",") ?? [];
+}
+
 export async function getLeaderboardData(endDate?: Date) {
   const startOfMonth = new Date(
     new Date().getFullYear(),
@@ -64,8 +68,6 @@ export async function getLeaderboardData(endDate?: Date) {
     new Date().getMonth() + 1,
     0,
   );
-
-  const excludedAthletes = Deno.env.get("EXCLUDED_ATHLETES")?.split(",") ?? [];
 
   return await getDb().select({
     athlete: activities.athlete,
@@ -81,14 +83,34 @@ export async function getLeaderboardData(endDate?: Date) {
           startOfMonth,
           endDate,
         ),
-        notInArray(activities.athlete, excludedAthletes),
+        notInArray(activities.athlete, getExcludedAthletes()),
       ),
     )
     .groupBy(activities.athlete)
     .orderBy(sql`SUM(${activities.distance}) DESC`);
 }
 
+export async function getNewActivities(activityList: StravaActivity[]) {
+  const existingActivities = await getDb().select().from(activities).where(
+    and(
+      inArray(activities.id, activityList.map(getActivityId)),
+    ),
+  );
+  return activityList.filter(
+    (activity) =>
+      !existingActivities.some(
+        (existingActivity) => existingActivity.id === getActivityId(activity),
+      ) &&
+      !getExcludedAthletes().includes(
+        `${activity.athlete.firstname} ${activity.athlete.lastname}`,
+      ),
+  );
+}
+
 export async function saveNewActivities(activityList: StravaActivity[]) {
+  if (activityList.length === 0) {
+    return;
+  }
   await getDb().insert(activities).values(
     activityList.map((activity) => ({
       id: getActivityId(activity),
