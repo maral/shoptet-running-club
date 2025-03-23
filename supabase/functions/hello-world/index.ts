@@ -11,6 +11,7 @@ import AsciiTable, {
   AsciiAlign,
 } from "https://deno.land/x/ascii_table@v0.1.0/mod.ts";
 import { postToSlack } from "./slackApi.ts";
+import { getActivityText } from "./openaiApi.ts";
 
 Deno.serve(async () => {
   try {
@@ -20,16 +21,17 @@ Deno.serve(async () => {
     await saveNewActivities(newActivities);
 
     for (const activity of newActivities) {
-      await postToSlack(
-        `:runner: Nový běh :runner:\n*${activity.athlete.firstname} ${activity.athlete.lastname} - ${activity.name}*\n:arrow_right: ${
-          (activity.distance / 1000).toFixed(1)
-        } km    :arrow_up: ${activity.total_elevation_gain} m    :stopwatch: ${
-          new Date(activity.moving_time * 1000).toISOString().slice(11, 19)
-        }    :skatepeped: ${
-          new Date(activity.moving_time / activity.distance * 1000 * 1000)
-            .toISOString().slice(15, 19)
-        } min/km`,
-      );
+      const text = await getActivityText({
+        athlete: `${activity.athlete.firstname} ${activity.athlete.lastname}`,
+        name: activity.name,
+        distance: `${(activity.distance / 1000).toFixed(1)} km`,
+        time: new Date(activity.moving_time * 1000).toISOString().slice(11, 19),
+        elevationGain: `${activity.total_elevation_gain} m`,
+        tempo: new Date(activity.moving_time / activity.distance * 1000 * 1000)
+          .toISOString().slice(15, 19),
+      });
+
+      await postToSlack(text);
     }
 
     const leaderboard = await getLeaderboard();
