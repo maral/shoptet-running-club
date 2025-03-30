@@ -23,7 +23,13 @@ export async function getActivityText(
         content:
           `Vytvoř kraťoučký text oznamující ve Slack kanálu nový běh. Mělo by to být stručné, ale obsahovat jméno běžce, název aktivity, vzdálenost, převýšení, čas a tempo - a zkus to napsat trochu zábavně - jako součást textu si můžeš vymyslet i něco originálního o daném běhu (něco co se přihodilo během běhu, před ním nebo po něm, případně co se běžci honilo hlavou, zkus být občas originální, ale klidně úplně fádní, někdy si ani nic vymýšlet nemusíš...). Údaje k běhu ti poskytne uživatel. Použij všechny údaje, ale název běhu využij jen pro kontext, neuváděj ho doslovně, často bývá vygenerovaný automaticky, občas je v jiném jazyce.
 
-Výstup uveď ve formátu mrkdwn (budu ho postovat přes Slack API do kanálu). Důležité - buď stručný.`,
+Výstup uveď ve formátu mrkdwn (budu ho postovat přes Slack API do kanálu). Instrukce k formátu mrkdwn:
+_italic_ will produce italicized text
+*bold* will produce bold text
+~strike~ will produce strikethrough text
+
+Pozor, Jen je v češtině mužské jméno.
+Důležité - buď stručný.`,
       },
       {
         role: "user",
