@@ -1,8 +1,7 @@
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { drizzle } from "drizzle-orm/node-postgres";
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { and, between, inArray, notInArray, sql } from "drizzle-orm/";
-import _pg from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { StravaActivity } from "./stravaApi.ts";
 
 export const tokens = pgTable("tokens", {
@@ -30,27 +29,6 @@ export function getDb() {
     db = drizzle(connectionString);
   }
   return db;
-}
-
-export async function getLeaderboard() {
-  const yesterdayLeaderboardData = await getLeaderboardData(
-    // 24 hours ago
-    new Date(new Date().getTime() - 24 * 60 * 60 * 1000),
-  );
-  const yesterdayPositions = new Map(
-    yesterdayLeaderboardData.map((row, index) => [row.athlete, index + 1]),
-  );
-  const leaderboardData = await getLeaderboardData();
-  const leaderboard = leaderboardData.map((row, index) => ({
-    position: index + 1,
-    position_change: (yesterdayPositions.get(row.athlete) ??
-      leaderboardData.length) - (index + 1),
-    athlete: row.athlete,
-    total_distance: row.total_distance,
-    total_moving_time: row.total_moving_time,
-    total_elevation_gain: row.total_elevation_gain,
-  }));
-  return leaderboard;
 }
 
 export function getExcludedAthletes() {

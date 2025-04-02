@@ -4,14 +4,12 @@
 
 // Setup type definitions for built-in Supabase Runtime APIs
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { getLeaderboard, getNewActivities, saveNewActivities } from "./db.ts";
+import { getNewActivities, saveNewActivities } from "./db.ts";
 import { getStravaAccessToken, getStravaClubActivities } from "./stravaApi.ts";
 
-import AsciiTable, {
-  AsciiAlign,
-} from "https://deno.land/x/ascii_table@v0.1.0/mod.ts";
-import { postToSlack } from "./slackApi.ts";
+import { getLeaderboardTable } from "./leaderboard.ts";
 import { getActivityText } from "./openaiApi.ts";
+import { postToSlack } from "./slackApi.ts";
 
 Deno.serve(async () => {
   try {
@@ -34,29 +32,7 @@ Deno.serve(async () => {
       await postToSlack(text);
     }
 
-    const leaderboard = await getLeaderboard();
-    const now = new Date();
-    const table = AsciiTable.fromJSON({
-      title: `Shoptet Running Challenge ${
-        now.getMonth() + 1
-      }/${now.getFullYear()}`,
-      heading: ["#", "∆", "Jméno", "Vzdálenost", "Převýšení", "Celkový čas"],
-      rows: leaderboard.map((row) => [
-        row.position,
-        row.position_change !== 0
-          ? `${(row.position_change > 0 ? "+" : "")}${row.position_change}`
-          : "",
-        row.athlete,
-        `${(row.total_distance / 1000).toFixed(1)} km`,
-        `${row.total_elevation_gain} m`,
-        new Date(row.total_moving_time * 1000).toISOString().slice(11, 19),
-      ]),
-    })
-      .setAlign(3, AsciiAlign.RIGHT)
-      .setAlign(4, AsciiAlign.RIGHT)
-      .setAlign(5, AsciiAlign.RIGHT);
-
-    await postToSlack("```" + table.toString() + "```");
+    await postToSlack(await getLeaderboardTable());
 
     return new Response(
       JSON.stringify({ success: true }),
