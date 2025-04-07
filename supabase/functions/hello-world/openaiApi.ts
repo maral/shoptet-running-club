@@ -28,7 +28,7 @@ _italic_ will produce italicized text
 *bold* will produce bold text
 ~strike~ will produce strikethrough text
 
-Pozor, Jen je v češtině mužské jméno.
+Pozor, Jen R. je muž. Pokud bude aktivita se jménem Jen R., je to muž a popisuj jej jako muže.
 Důležité - buď stručný.`,
       },
       {

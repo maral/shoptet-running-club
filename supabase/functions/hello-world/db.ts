@@ -1,5 +1,6 @@
 import { and, between, inArray, notInArray, sql } from "drizzle-orm/";
 import { drizzle } from "drizzle-orm/node-postgres";
+import _pg from "pg";
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { StravaActivity } from "./stravaApi.ts";
