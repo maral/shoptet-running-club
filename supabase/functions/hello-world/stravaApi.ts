@@ -76,20 +76,28 @@ export async function getStravaClubActivities(accessToken: string) {
   const now = new Date();
   const after = new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000;
 
-  const res = await ky.get<StravaActivity[]>(
-    `https://www.strava.com/api/v3/clubs/${clubId}/activities`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+  const allActivities: StravaActivity[] = [];
+  while (true) {
+    const res = await ky.get<StravaActivity[]>(
+      `https://www.strava.com/api/v3/clubs/${clubId}/activities`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        searchParams: {
+          after,
+          per_page: 200,
+        },
       },
-      searchParams: {
-        after,
-        per_page: 200,
-      },
-    },
-  ).json();
+    ).json();
+    allActivities.push(...res);
 
-  return res.filter((activity) =>
+    if (res.length < 200) {
+      break;
+    }
+  }
+
+  return allActivities.filter((activity) =>
     activity.sport_type === "Run" || activity.sport_type === "TrailRun"
   );
 }

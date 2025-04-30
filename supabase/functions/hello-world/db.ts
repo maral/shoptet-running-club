@@ -45,7 +45,7 @@ export async function getLeaderboardData(endDate?: Date) {
   endDate = endDate ?? new Date(
     new Date().getFullYear(),
     new Date().getMonth() + 1,
-    0,
+    1,
   );
 
   return await getDb().select({
